@@ -25,6 +25,7 @@ Such instances are composed of
 
 - an instance of `MPCCModelMeta`, which provides information about the problem,
   including the number of variables, constraints, bounds on the variables, etc.
+  This `MPCCModelMeta` wraps an `AbstractNLPModelMeta` and only updates the necessary fields by overloading the getter api in `NLPModels.jl`.
 - the underlying `AbstractNLPModel` which stores the data necessary to build the MPCC.
 
 ## Install
