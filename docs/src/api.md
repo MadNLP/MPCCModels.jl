@@ -5,7 +5,7 @@ problem in the following format:
 ```math
 \begin{aligned}
 \min \quad & f(x) \\
-& \ell_c \le c_i(x) \le u_c,\\
+& \ell_c \le c(x) \le u_c,\\
 & \ell_G\le G(x) \perp H(x)\ge l_H, \\
 & \ell \leq x \leq u.
 \end{aligned}
@@ -15,21 +15,21 @@ We implement this by wrapping an `AbstractNLPModel` in the form:
 ```math
 \begin{aligned}
 \min \quad & f(x) \\
-& c_L \leq c(x) \leq c_U \\
+& c_L \leq c'(x) \leq c_U \\
 & \ell \leq x \leq u,
 \end{aligned}
 ```
 along with three vectors `ind_cc1`, `ind_cc2`, and `cc_types`.
 We encode the functions ``G(x)`` and ``H(x)`` via these vectors in the following way.
-The vectors `ind_cc1` and `ind_cc2` correspond to indexes into the vectors ``x`` and ``c(x)``.
+The vectors `ind_cc1` and `ind_cc2` correspond to indexes into the vectors ``x`` and ``c'(x)``.
 Which of these vectors are the target of the indexing is determined by the values in `cc_types`:
 
 | `CCType[k]` | ``G_k(x)`` | ``H_k(x)`` |
 |-------------|------------|------------|
 | `VarVar`    | ``x_i``    | ``x_j``    |
-| `VarCon`    | ``x_i``    | ``c_j(x)`` |
-| `ConVar`    | ``c_i(x)`` | ``x_j``    |
-| `ConCon`    | ``c_i(x)`` | ``c_j(x)`` |
+| `VarCon`    | ``x_i``    | ``c'_j(x)`` |
+| `ConVar`    | ``c'_i(x)`` | ``x_j``    |
+| `ConCon`    | ``c'_i(x)`` | ``c'_j(x)`` |
 
 This allows the user maximum flexibility when it comes to modelling the original MPCC.
 For practical algorithms however, we reformulate the problem into the so called "vertical form":

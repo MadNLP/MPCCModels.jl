@@ -3,9 +3,10 @@ using NLPModels, LinearAlgebra, SparseArrays
 
 """
   Abstract type for problems in the form:
-  min f(w)
-  s.t. lbc ≤ c(w) ≤ ubc
-       0 ≤ G(w) ⟂ H(w) ≥ 0
+
+    min f(w)
+    s.t. lbc ≤ c(w) ≤ ubc
+         lbG ≤ G(w) ⟂ H(w) ≥ lbH
 """
 abstract type AbstractMPCCModel{T, VT} end
 

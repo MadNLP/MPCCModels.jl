@@ -1,13 +1,15 @@
 
 """
   Concrete type for problems in the form:
-  min f(x)
-  s.t. lbc ≤ c(x) ≤ ubc
-       lbG ≤ G(x) ⟂ H(x) ≥ lbH
+
+    min f(x)
+    s.t. lbc ≤ c(x) ≤ ubc
+         lbG ≤ G(x) ⟂ H(x) ≥ lbH
 
   where G(x) and H(x) are defined by index sets into the x and c(x) of an nlp of the from:
-  min f(x)
-  s.t. lbc ≤ c(x) ≤ ubc
+
+    min f(x)
+    s.t. lbc ≤ c(x) ≤ ubc
 """
 struct MPCCModel{T, VT, NLP <: NLPModels.AbstractNLPModel{T, VT}, NMT} <:
        AbstractMPCCModel{T, VT}
@@ -25,9 +27,10 @@ end
 ######################### MPCC Constructors #########################
 """
   Constructor for `MPCCModel` in the form:
-  min f(x)
-  s.t. lbc ≤ c(w) ≤ ubc
-       lbx₁ ≤ x₁ ⟂x₂ ≥ lbx₂
+
+     min f(x)
+     s.t. lbc ≤ c(w) ≤ ubc
+          lbx₁ ≤ x₁ ⟂x₂ ≥ lbx₂
 
   where x₁ and x₂ are defined by index sets ind_vcc1 and ind_vcc2.
 """
@@ -400,6 +403,9 @@ function MPCCModel(
 end
 
 ######################### Vertical Form Conversion #########################
+"""
+  "Verticalize" a generic MPCC by lifting the nonscalar compenents of ``G(x)`` and ``H(x)``.
+"""
 function vertical_form(mpcc::AbstractMPCCModel)
     ind_var1 = [
         get_ind_cc1(mpcc)[i] for
