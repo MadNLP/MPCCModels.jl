@@ -7,44 +7,27 @@ designing optimization solvers in Julia.
 
 ## Introduction
 
-The general form of the optimization problem is
+This package is built for modelling problems of the form
 ```math
 \begin{aligned}
 \min \quad & f(x) \\
-& c_i(x) = c_{E_i}, \quad i \in {\cal E}, \\
-& c_{L_i} \leq c_i(x) \leq c_{U_i}, \quad i \in {\cal I}, \\
+& \ell_c \le c_i(x) \le u_c,\\
+& \ell_G\le G(x) \perp H(x)\ge l_H, \\
 & \ell \leq x \leq u,
 \end{aligned}
 ```
 where ``f:\mathbb{R}^n\rightarrow\mathbb{R}``,
 ``c:\mathbb{R}^n\rightarrow\mathbb{R}^m``,
-``{\cal E}\cup {\cal I} = \{1,2,\dots,m\}``, ``{\cal E}\cap {\cal I} = \emptyset``,
-and
-``c_{E_i}, c_{L_i}, c_{U_i}, \ell_j, u_j \in \mathbb{R}\cup\{\pm\infty\}``
-for ``i = 1,\dots,m`` and ``j = 1,\dots,n``.
-
-For computational reasons, we write
-```math
-\begin{aligned}
-\min \quad & f(x) \\
-& c_L \leq c(x) \leq c_U \\
-& \ell \leq x \leq u,
-\end{aligned}
-```
-defining ``c_{L_i} = c_{U_i} = c_{E_i}`` for all ``i \in {\cal E}``.
-The Lagrangian of this problem is defined as
-```math
-L(x,y,z^L,z^U;\sigma) = \sigma f(x) + c(x)^T y  + \sum_{i=1}^n z_{L_i}(x_i-l_i) + \sum_{i=1}^n z_{U_i}(u_i-x_i),
-```
-where ``\sigma`` is a scaling parameter included for computational reasons.
-Since the final two sums are linear in ``x``, the variables ``z_L`` and ``z_U`` do not appear in the Hessian ``\nabla^2 L(x,y)``.
+``G:\mathbb{R}^n\rightarrow\mathbb{R}^{n_{cc}}``,
+``H:\mathbb{R}^n\rightarrow\mathbb{R}^{n_{cc}}``,
+and ``\ell_a \le a\perp b \ge \ell_b`` means that for each element of the vectors a and b, at least one must be zero.
 
 Optimization problems are represented by an instance/subtype of `AbstractMPCCModel`.
 Such instances are composed of
 
-- an instance of [`MPCCModelMeta`](@ref Attributes), which provides information about the problem,
+- an instance of `MPCCModelMeta`, which provides information about the problem,
   including the number of variables, constraints, bounds on the variables, etc.
-- other data specific to the provenance of the problem.
+- the underlying `AbstractNLPModel` which stores the data.
 
 ## Install
 
