@@ -21,5 +21,5 @@ makedocs(
 deploydocs(
   repo = "github.com/MadNLP/MPCCModels.jl.git",
   push_preview = true,
-  devbranch = "main",
+  devbranch = "master",
 )
