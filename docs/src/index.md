@@ -1,9 +1,7 @@
 # [MPCCModels.jl documentation](@id Home)
 
-This package provides general guidelines to represent non-linear programming (NLP)
-problems in Julia and a standardized API to evaluate the functions and
-their derivatives. The main objective is to be able to rely on that [API](@ref) when
-designing optimization solvers in Julia.
+This package provides general guidelines to represent Mathematical Programs with Complementarity Constraints (MPCC) problems in Julia and a standardized API to evaluate the functions and their derivatives. 
+The main objective is to be able to rely on that [API](@ref) when designing specialized MPCC solvers in Julia.
 
 ## Introduction
 
@@ -27,7 +25,7 @@ Such instances are composed of
 
 - an instance of `MPCCModelMeta`, which provides information about the problem,
   including the number of variables, constraints, bounds on the variables, etc.
-- the underlying `AbstractNLPModel` which stores the data.
+- the underlying `AbstractNLPModel` which stores the data necessary to build the MPCC.
 
 ## Install
 
@@ -37,6 +35,7 @@ pkg> add MPCCModels
 ```
 
 This will enable the use of the API and the tools described here, and it allows the creation of a manually written model.
+
 
 ## License
 
