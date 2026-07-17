@@ -9,8 +9,8 @@ This package is built for modelling problems of the form
 ```math
 \begin{aligned}
 \min \quad & f(x) \\
-& \ell_c \le c(x) \le u_c,\\
-& \ell_G\le G(x) \perp H(x)\ge l_H, \\
+& \ell^c \le c(x) \le u^c,\\
+& \ell^G\le G(x) \perp H(x)\ge \ell^H, \\
 & \ell \leq x \leq u,
 \end{aligned}
 ```
