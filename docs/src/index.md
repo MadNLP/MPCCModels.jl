@@ -28,6 +28,21 @@ Such instances are composed of
   This `MPCCModelMeta` wraps an `AbstractNLPModelMeta` and only updates the necessary fields by overloading the getter api in `NLPModels.jl`.
 - the underlying `AbstractNLPModel` which stores the data necessary to build the MPCC.
 
+## Important Usage Note
+Note that while we support modelling MPCCs with nonlinear functions ``G(x)`` and ``H(x)``, the [API](@ref) supports only vertical
+form mpccs: 
+```math
+\begin{aligned}
+\min \quad & f(x) \\
+& \ell^c \le c(x) \le u^c,\\
+& \ell^G\le x_1 \perp x_2\ge \ell^H, \\
+& \ell \leq x \leq u,
+\end{aligned}
+```
+
+In order to ensure your MPCC is in vertical form use the [`vertical_form`](@ref) function.
+
+
 ## Install
 
 Install `MPCCModels.jl` with the following command.

@@ -37,7 +37,7 @@ For practical algorithms however, we reformulate the problem into the so called 
 \begin{aligned}
 \min \quad & f(x) \\
 & \ell^c \le c(x) \le u^c,\\
-& \ell^G\le x_1 \perp x_2\ge \sll^H, \\
+& \ell^G\le x_1 \perp x_2\ge \ell^H, \\
 & \ell \leq x \leq u,
 \end{aligned}
 ```

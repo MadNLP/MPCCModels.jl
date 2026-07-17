@@ -26,3 +26,12 @@ using NLPModels,MPCCModels
 nlp = create_your_nlp_model()
 mpcc = MPCCModel(nlp, ind_x1, ind_x2)
 ```
+
+**Important**: Note that currently we only support the [`API`](https://madsuite.org/MPCCModels.jl/dev/api/#API) for MPCCs in "vertical form".
+In order to make sure your MPCC is in vertical form use the [`vertical_form`](https://madsuite.org/MPCCModels.jl/dev/reference/#MPCCModels.vertical_form-Tuple{AbstractMPCCModel}) function:
+```julia
+using NLPModels,MPCCModels
+nlp = create_your_nlp_model()
+mpcc = MPCCModel(nlp, ind_cc1, ind_cc1, cctypes)
+vertical_mpcc = vertical_form(mpcc)
+```
