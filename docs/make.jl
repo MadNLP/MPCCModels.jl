@@ -1,5 +1,5 @@
 push!(LOAD_PATH,"../src/")
-using Documenter, MPCCModels
+using Documenter, MPCCModels, NLPModels
 
 makedocs(
   modules = [MPCCModels],

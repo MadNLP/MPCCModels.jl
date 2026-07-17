@@ -7,7 +7,7 @@ problem in the following format:
 \min \quad & f(x) \\
 & \ell_c \le c(x) \le u_c,\\
 & \ell_G\le G(x) \perp H(x)\ge l_H, \\
-& \ell \leq x \leq u.
+& \ell \leq x \leq u,
 \end{aligned}
 ```
 
@@ -43,28 +43,28 @@ For practical algorithms however, we reformulate the problem into the so called 
 ```
 
 where all of the complementarity pairs are lifted to individual variables.
-This is done via the `vertical_form` function.
+This is done via the [`vertical_form`](@ref) function.
 
-In order to develop algorithms for solving MPCCs we define the following api for the `AbstractMPCCModel` type:
+In order to develop algorithms for solving MPCCs we define the following API for the [`AbstractMPCCModel`](@ref) type:
 
-| Function                                              | `MPCCModels.jl` function                              | Notes                                         |
-|-------------------------------------------------------|-------------------------------------------------------|-----------------------------------------------|
-| ``G(x)``                                              | `comp_left`                                           | Raw evaluation of ``G(x)``                    |
-| ``G(x)-\ell_G``                                       | `comp_res_left`                                       | Left hand side complementarity residual       |
-| ``\nabla_x G(x)``                                     | `jac_comp_left_structure` and `jac_comp_left_coord`   | Jacobian of left hand side of complementarity |
-| ``H(x)``                                              | `comp_right`                                          |                                               |
-| ``H(x)-\ell_H``                                       | `comp_res_right`                                      | Right hand side complementarity residual      |
-| ``\nabla_x G(x)``                                     | `jac_comp_right_structure` and `jac_comp_right_coord` | Jacobian of left hand side of complementarity |
-| ``\vert\min(G(x)-\ell_G,H(x)-\ell_H)\vert_\infty``    | `comp_residual`                                       |                                               |
-| ``\vert (G(x)-\ell_G)\odot(H(x)-\ell_H)\vert_\infty`` | `comp_residual_product`                               |                                               |
-| ``(G(x)-\ell_G)\dot(H(x)-\ell_H)``                    | `comp_residual_sum`                                   |                                               |
+| Function                                              | `MPCCModels.jl` function                                              | Notes                                         |
+|-------------------------------------------------------|-----------------------------------------------------------------------|-----------------------------------------------|
+| ``G(x)``                                              | [`comp_left`](@ref)                                                   | Raw evaluation of ``G(x)``                    |
+| ``G(x)-\ell_G``                                       | [`comp_res_left`](@ref)                                               | Left hand side complementarity residual       |
+| ``\nabla_x G(x)``                                     | [`jac_comp_left_structure`](@ref) and [`jac_comp_left_coord`](@ref)   | Jacobian of left hand side of complementarity |
+| ``H(x)``                                              | [`comp_right`](@ref)                                                  |                                               |
+| ``H(x)-\ell_H``                                       | [`comp_res_right`](@ref)                                              | Right hand side complementarity residual      |
+| ``\nabla_x G(x)``                                     | [`jac_comp_right_structure`](@ref) and [`jac_comp_right_coord`](@ref) | Jacobian of left hand side of complementarity |
+| ``\vert\min(G(x)-\ell_G,H(x)-\ell_H)\vert_\infty``    | [`comp_residual`](@ref)                                               |                                               |
+| ``\vert (G(x)-\ell_G)\odot(H(x)-\ell_H)\vert_\infty`` | [`comp_residual_product`](@ref)                                       |                                               |
+| ``(G(x)-\ell_G)\dot(H(x)-\ell_H)``                    | [`comp_residual_sum`](@ref)                                           |                                               |
 
-along with overloads for the following `NLPModels.jl` api.
+along with overloads for the following `NLPModels.jl` API.
 
-| Function                  | `NLPModels.jl` function                    | notes                                                                                                            |
-|---------------------------|--------------------------------------------|------------------------------------------------------------------------------------------------------------------|
-| ``f(x)``                  | `obj`                                      |                                                                                                                  |
-| ``\nabla f(x)``           | `grad`                                     |                                                                                                                  |
-| ``c(x)``                  | `cons`                                     | Note that this includes possible lifted constraints but _not_ those contained in ``G(x)`` or ``H(x)``            |
-| ``\nabla c(x)``           | `jac`, `jac_structure`, and `jac_coord`    | Note that this includes possible lifted constraints but _not_ those contained in ``G(x)`` or ``H(x)``            |
-| ``\nabla^2 L(x,\lambda)`` | `hess`, `hess_structure`, and `hess_coord` | Note that this is not the MPCC lagrangian but the NLP Lagrangian with no contribution from the complementarities |
+| Function                  | `NLPModels.jl` function                                            | notes                                                                                                            |
+|---------------------------|--------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------|
+| ``f(x)``                  | [`NLPModels.obj`](@ref)                                            |                                                                                                                  |
+| ``\nabla f(x)``           | [`NLPModels.grad`](@ref)                                                     |                                                                                                                  |
+| ``c(x)``                  | [`NLPModels.cons`](@ref)                                                     | Note that this includes possible lifted constraints but _not_ those contained in ``G(x)`` or ``H(x)``            |
+| ``\nabla c(x)``           | [`NLPModels.jac`](@ref), [`NLPModels.jac_structure`](@ref), and [`NLPModels.jac_coord`](@ref)    | Note that this includes possible lifted constraints but _not_ those contained in ``G(x)`` or ``H(x)``            |
+| ``\nabla^2 L(x,\lambda)`` | [`NLPModels.hess`](@ref), [`NLPModels.hess_structure`](@ref), and [`NLPModels.hess_coord`](@ref) | Note that this is not the MPCC lagrangian but the NLP Lagrangian with no contribution from the complementarities |
