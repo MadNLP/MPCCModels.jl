@@ -36,10 +36,12 @@ form mpccs:
 \min \quad & f(x) \\
 & \ell^c \le c(x) \le u^c,\\
 & \ell^G\le x_1 \perp x_2\ge \ell^H, \\
-& \ell \leq x \leq u,
+& \ell_0 \leq x_0 \leq u_0,
+& x_1 \leq u_1,
+& x_2 \leq u_2,
 \end{aligned}
 ```
-
+where ``x_0`` ``x_1`` and ``x_2`` correspond to subsets of the decision variables ``x``.
 In order to ensure your MPCC is in vertical form use the [`vertical_form`](@ref) function.
 
 

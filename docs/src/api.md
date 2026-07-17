@@ -38,11 +38,12 @@ For practical algorithms however, we reformulate the problem into the so called 
 \min \quad & f(x) \\
 & \ell^c \le c(x) \le u^c,\\
 & \ell^G\le x_1 \perp x_2\ge \ell^H, \\
-& \ell \leq x \leq u,
+& \ell_0 \leq x_0 \leq u_0,
+& x_1 \leq u_1,
+& x_2 \leq u_2,
 \end{aligned}
 ```
-
-where all of the complementarity pairs are lifted to individual variables.
+where ``x_0`` ``x_1`` and ``x_2`` correspond to subsets of the decision variables ``x``.
 This is done via the [`vertical_form`](@ref) function.
 
 In order to develop algorithms for solving MPCCs we define the following API for the [`AbstractMPCCModel`](@ref) type:
