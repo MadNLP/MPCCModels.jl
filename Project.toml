@@ -1,7 +1,11 @@
 name = "MPCCModels"
 uuid = "cbaba3ef-cedb-4e5a-9903-71bbac24a74a"
 version = "0.1.0"
-authors = ["Anton E. Pozharskiy", "Francois Pacaud", "Armin Nurkanovic"]
+authors = [
+        "Anton E. Pozharskiy <anton@pozhar.ski>",
+        "François Pacaud Pacaud <francoispacaud8@gmail.com>",
+        "Armin Nurkanović <armin.nurkanovic@imtek.uni-freiburg.de>",
+        ]
 
 [deps]
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
