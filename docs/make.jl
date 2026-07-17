@@ -1,5 +1,5 @@
 push!(LOAD_PATH,"../src/")
-using Documenter, MPCCModels
+using Documenter, MPCCModels, NLPModels
 
 makedocs(
   modules = [MPCCModels],
@@ -21,5 +21,5 @@ makedocs(
 deploydocs(
   repo = "github.com/MadNLP/MPCCModels.jl.git",
   push_preview = true,
-  devbranch = "main",
+  devbranch = "master",
 )

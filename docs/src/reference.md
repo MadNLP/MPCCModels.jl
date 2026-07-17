@@ -13,5 +13,6 @@ Pages = ["reference.md"]
 ```
 
 ```@autodocs
-Modules = [NLPModels]
+Modules = [MPCCModels]
+Pages   = ["MPCCModels.jl", "api.jl", "model.jl", "utils.jl", "meta.jl"]
 ```

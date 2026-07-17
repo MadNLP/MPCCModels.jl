@@ -56,11 +56,11 @@ for field in fieldnames(NLPModelMeta) ∪ fieldnames(MPCCModelMeta)
         @eval NLPModels.$meth(mpcc::AbstractMPCCModel) = $meth(mpcc.meta)
     else
         @eval begin
-            @doc """
+            """
                   $($meth)(nlp)
                   $($meth)(meta)
                   Return the value $($(QuoteNode(field))) from meta or nlp.meta.
-      """
+            """
             $meth(meta::MPCCModelMeta) = getproperty(meta, $(QuoteNode(field)))
         end
         @eval $meth(mpcc::AbstractMPCCModel) = $meth(mpcc.meta)

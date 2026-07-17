@@ -5,64 +5,66 @@ problem in the following format:
 ```math
 \begin{aligned}
 \min \quad & f(x) \\
-& c_L \leq c(x) \leq c_U \\
-& \ell \leq x \leq u.
+& \ell^c \le c(x) \le u^c,\\
+& \ell^G\le G(x) \perp H(x)\ge \ell^H, \\
+& \ell \leq x \leq u,
 \end{aligned}
 ```
-To develop an optimization algorithm, we are usually worried not only with
-``f(x)`` and ``c(x)``, but also with their derivatives.
-Namely,
 
-- ``\nabla f(x)``, the gradient of ``f`` at the point ``x``;
-- ``\nabla^2 f(x)``, the Hessian of ``f`` at the point ``x``;
-- ``J(x) = \nabla c(x)^T``, the Jacobian of ``c`` at the point ``x``;
-- ``\nabla^2 f(x) + \sum_{i=1}^m y_i \nabla^2 c_i(x)``,
-  the Hessian of the Lagrangian function at the point ``(x,y)``.
+We implement this by wrapping an `AbstractNLPModel` in the form:
+```math
+\begin{aligned}
+\min \quad & f(x) \\
+& \ell^g \leq g(x) \leq u^g \\
+& \ell \leq x \leq u,
+\end{aligned}
+```
+along with three vectors `ind_cc1`, `ind_cc2`, and `cc_types`.
+We encode the functions ``G(x)`` and ``H(x)`` via these vectors in the following way.
+The vectors `ind_cc1` and `ind_cc2` correspond to indexes into the vectors ``x`` and ``g(x)``.
+Which of these vectors are the target of the indexing is determined by the values in `cc_types`:
 
-There are many ways to access some of these values, so here is a little
-reference guide.
+| `CCType[k]` | ``G_k(x)`` | ``H_k(x)`` | ``\ell^G_k`` | ``\ell^H_k`` |
+|-------------|------------|------------|--------------|--------------|
+| `VarVar`    | ``x_i``    | ``x_j``    | ``\ell_i``   | ``\ell_j``   |
+| `VarCon`    | ``x_i``    | ``g_j(x)`` | ``\ell_i``   | ``\ell^g_j`` |
+| `ConVar`    | ``g_i(x)`` | ``x_j``    | ``\ell^g_i`` | ``\ell_j``   |
+| `ConCon`    | ``g_i(x)`` | ``g_j(x)`` | ``\ell^g_i`` | ``\ell^g_j`` |
 
-## Reference guide
+This allows the user maximum flexibility when it comes to modelling the original MPCC.
+For practical algorithms however, we reformulate the problem into the so called "vertical form":
+```math
+\begin{aligned}
+\min \quad & f(x) \\
+& \ell^c \le c(x) \le u^c,\\
+& \ell^G\le x_1 \perp x_2\ge \sll^H, \\
+& \ell \leq x \leq u,
+\end{aligned}
+```
 
-The following naming should be easy enough to follow.
-If not, click on the link and go to the description.
+where all of the complementarity pairs are lifted to individual variables.
+This is done via the [`vertical_form`](@ref) function.
 
-- `!` means inplace;
-- `_coord` means coordinate format;
-- `_dense` means dense format;
-- `prod` means matrix-vector product;
-- `_op` means operator (as in [LinearOperators.jl](https://github.com/JuliaSmoothOptimizers/LinearOperators.jl));
-- `_lin` and `_nln` respectively refer to linear and nonlinear constraints.
+In order to develop algorithms for solving MPCCs we define the following API for the [`AbstractMPCCModel`](@ref) type:
 
-Feel free to open an issue to suggest other methods that should apply to all
-NLPModels instances.
+| Function                                              | `MPCCModels.jl` function                                              | Notes                                         |
+|-------------------------------------------------------|-----------------------------------------------------------------------|-----------------------------------------------|
+| ``G(x)``                                              | [`comp_left`](@ref)                                                   | Raw evaluation of ``G(x)``                    |
+| ``G(x)-\ell^G``                                       | [`comp_res_left`](@ref)                                               | Left hand side complementarity residual       |
+| ``\nabla_x G(x)``                                     | [`jac_comp_left_structure`](@ref) and [`jac_comp_left_coord`](@ref)   | Jacobian of left hand side of complementarity |
+| ``H(x)``                                              | [`comp_right`](@ref)                                                  |                                               |
+| ``H(x)-\ell^H``                                       | [`comp_res_right`](@ref)                                              | Right hand side complementarity residual      |
+| ``\nabla_x G(x)``                                     | [`jac_comp_right_structure`](@ref) and [`jac_comp_right_coord`](@ref) | Jacobian of left hand side of complementarity |
+| ``\vert\min(G(x)-\ell^G,H(x)-\ell^H)\vert_\infty``    | [`comp_residual`](@ref)                                               |                                               |
+| ``\vert (G(x)-\ell^G)\odot(H(x)-\ell^H)\vert_\infty`` | [`comp_residual_product`](@ref)                                       |                                               |
+| ``(G(x)-\ell^G)\cdot(H(x)-\ell^H)``                    | [`comp_residual_sum`](@ref)                                           |                                               |
 
-| Function          | NLPModels function                                                                                                                                                                                   |
-|-------------------|-------------------------------------------|
-| ``f(x)``            | [`obj`](@ref), [`objgrad`](@ref), [`objgrad!`](@ref), [`objcons`](@ref), [`objcons!`](@ref) |
-| ``\nabla f(x)``     | [`grad`](@ref), [`grad!`](@ref), [`objgrad`](@ref), [`objgrad!`](@ref) |
-| ``\nabla^2 f(x)``   | [`hess`](@ref), [`hess_op`](@ref), [`hess_op!`](@ref), [`hess_coord`](@ref), [`hess_coord!`](@ref), [`hess_dense!`](@ref), [`hess_structure`](@ref), [`hess_structure!`](@ref), [`hprod`](@ref), [`hprod!`](@ref) |
-| ``c(x)``            | [`cons_lin`](@ref), [`cons_lin!`](@ref), [`cons_nln`](@ref), [`cons_nln!`](@ref), [`cons`](@ref), [`cons!`](@ref), [`objcons`](@ref), [`objcons!`](@ref) |
-| ``J(x)``            | [`jac_lin`](@ref), [`jac_nln`](@ref), [`jac`](@ref), [`jac_lin_op`](@ref), [`jac_lin_op!`](@ref), [`jac_nln_op`](@ref), [`jac_nln_op!`](@ref),[`jac_op`](@ref), [`jac_op!`](@ref), [`jac_lin_coord`](@ref), [`jac_lin_coord!`](@ref), [`jac_nln_coord`](@ref), [`jac_nln_coord!`](@ref), [`jac_coord`](@ref), [`jac_coord!`](@ref), [`jac_dense!`](@ref), [`jac_lin_structure`](@ref), [`jac_lin_structure!`](@ref), [`jac_nln_structure`](@ref), [`jac_nln_structure!`](@ref), [`jac_structure`](@ref), [`jprod_lin`](@ref), [`jprod_lin!`](@ref), [`jprod_nln`](@ref), [`jprod_nln!`](@ref), [`jprod`](@ref), [`jprod!`](@ref), [`jtprod_lin`](@ref), [`jtprod_lin!`](@ref), [`jtprod_nln`](@ref), [`jtprod_nln!`](@ref), [`jtprod`](@ref), [`jtprod!`](@ref) |
-| ``\nabla^2 L(x,y)`` | [`hess`](@ref), [`hess_op`](@ref), [`hess_coord`](@ref), [`hess_coord!`](@ref), [`hess_dense!`](@ref), [`hess_structure`](@ref), [`hess_structure!`](@ref), [`hprod`](@ref), [`hprod!`](@ref), [`jth_hprod`](@ref), [`jth_hprod!`](@ref), [`jth_hess`](@ref), [`jth_hess_coord`](@ref), [`jth_hess_coord!`](@ref), [`ghjvprod`](@ref), [`ghjvprod!`](@ref)  |
+along with overloads for the following `NLPModels.jl` API.
 
-If only a subset of the functions listed above is implemented, you can indicate which ones are not available when creating the [`NLPModelMeta`](@ref), using the keyword arguments
-`grad_available`, `jac_available`, `hess_available`, `jprod_available`, `jtprod_available`, and `hprod_available`.
-You can also specify whether the Jacobian of the constraints and the Hessian of the objective or Lagrangian are sparse using the keyword arguments `sparse_jacobian` and `sparse_hessian`.
-
-## [API for NLSModels](@id nls-api)
-
-For the Nonlinear Least Squares models, ``f(x) = \tfrac{1}{2} \Vert F(x)\Vert^2``,
-and these models have additional function to access the residual value
-and its derivatives. Namely,
-
-- ``J_F(x) = \nabla F(x)^T``
-- ``\nabla^2 F_i(x)``
-
-| Function            | function |
-|---------------------|---|
-| ``F(x)``            | [`residual`](@ref), [`residual!`](@ref) |
-| ``J_F(x)``          | [`jac_residual`](@ref), [`jac_coord_residual`](@ref), [`jac_coord_residual!`](@ref), [`jac_structure_residual`](@ref), [`jac_structure_residual!`](@ref), [`jprod_residual`](@ref), [`jprod_residual!`](@ref), [`jtprod_residual`](@ref), [`jtprod_residual!`](@ref), [`jac_op_residual`](@ref), [`jac_op_residual!`](@ref) |
-| ``\nabla^2 F_i(x)`` | [`hess_residual`](@ref), [`hess_coord_residual`](@ref), [`hess_coord_residual!`](@ref), [`hess_structure_residual`](@ref), [`hess_structure_residual!`](@ref), [`jth_hess_residual`](@ref), [`jth_hess_residual_coord`](@ref), [`jth_hess_residual_coord!`](@ref), [`hprod_residual`](@ref), [`hprod_residual!`](@ref), [`hess_op_residual`](@ref), [`hess_op_residual!`](@ref) |
-
-If only a subset of the functions listed above is implemented, you can indicate which ones are not available when creating the [`NLSMeta`](@ref), using the keyword arguments `jac_residual_available`, `hess_residual_available`, `jprod_residual_available`, `jtprod_residual_available`, and `hprod_residual_available`.
+| Function                  | `NLPModels.jl` function                                            | notes                                                                                                            |
+|---------------------------|--------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------|
+| ``f(x)``                  | [`NLPModels.obj`](@ref)                                            |                                                                                                                  |
+| ``\nabla f(x)``           | [`NLPModels.grad`](@ref)                                                     |                                                                                                                  |
+| ``c(x)``                  | [`NLPModels.cons`](@ref)                                                     | Note that this includes possible lifted constraints but _not_ those contained in ``G(x)`` or ``H(x)``            |
+| ``\nabla c(x)``           | [`NLPModels.jac`](@ref), [`NLPModels.jac_structure`](@ref), and [`NLPModels.jac_coord`](@ref)    | Note that this includes possible lifted constraints but _not_ those contained in ``G(x)`` or ``H(x)``            |
+| ``\nabla^2 L(x,\lambda)`` | [`NLPModels.hess`](@ref), [`NLPModels.hess_structure`](@ref), and [`NLPModels.hess_coord`](@ref) | Note that this is not the MPCC lagrangian but the NLP Lagrangian with no contribution from the complementarities |

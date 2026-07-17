@@ -1,6 +1,13 @@
 # MPCCModels
 
 [![Build Status](https://github.com/apozharski/MPCCModels.jl/actions/workflows/CI.yml/badge.svg?branch=master)](https://github.com/apozharski/MPCCModels.jl/actions/workflows/CI.yml?query=branch%3Amaster)
+[![docs-stable][docs-stable-img]][docs-stable-url]
+[![docs-dev][docs-dev-img]][docs-dev-url]
+
+[docs-stable-img]: https://img.shields.io/badge/docs-stable-blue.svg
+[docs-stable-url]: https://madsuite.org/MPCCModels.jl/stable
+[docs-dev-img]: https://img.shields.io/badge/docs-dev-purple.svg
+[docs-dev-url]: https://madsuite.org/MPCCModels.jl/dev
 
 A julia package built on top of [NLPModels](https://github.com/JuliaSmoothOptimizers/NLPModels.jl/) for providing the functions needed to build solvers for Mathematical Programs with Complementarity Constraints.
 

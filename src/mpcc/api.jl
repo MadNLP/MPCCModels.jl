@@ -1,24 +1,44 @@
 ######################### Implementing NLPModels API #########################
+"""
+  Evaluates the MPCC objective ``f(x)``
+"""
 NLPModels.obj(mpcc::AbstractMPCCModel, x::AbstractVector) = NLPModels.obj(mpcc.nlp, x)
+
+"""
+  Evaluates in place the gradient of the MPCC objective ``\\nabla f(x)``
+"""
 function NLPModels.grad!(mpcc::AbstractMPCCModel, x::AbstractVector, gx::AbstractVector)
     NLPModels.grad!(mpcc.nlp, x, gx)
     return gx
 end
+
+"""
+  Evaluates the gradient of the MPCC objective ``\\nabla f(x)`` to a newly allocated vector.
+"""
 function NLPModels.grad(mpcc::AbstractMPCCModel{T}, x::AbstractVector{T}) where {T}
     g = Vector{T}(undef, get_nvar(mpcc))
     return grad!(mpcc, x, g)
 end
 
+"""
+  Evaluates in place the gradient of the MPCC objective ``\\nabla f(x)`` and returns the objective ``f(x)``.
+"""
 function NLPModels.objgrad!(mpcc::AbstractMPCCModel, x::AbstractVector, g::AbstractVector)
     return NLPModels.objgrad!(mpcc.nlp, x, g)
 end
 
+"""
+  Evaluates the constraints ``c(x)`` excluding any which appear in ``G(x)`` or ``H(x)``, to a newly allocated vector.
+"""
 function NLPModels.cons(mpcc::AbstractMPCCModel{T,VT}, x::AbstractVector) where {T,VT}
     c = VT(undef,get_ncon(mpcc))
     cons!(mpcc, x, c)
     return c
 end
 
+"""
+  Evaluates the constraints ``c(x)`` excluding any which appear in ``G(x)`` or ``H(x)``, in place.
+"""
 function NLPModels.cons!(mpcc::AbstractMPCCModel, x::AbstractVector, cx::AbstractVector)
     cons!(mpcc.nlp, x, mpcc._c1)
     @views cx .= mpcc._c1[get_ind_c(mpcc)]
@@ -39,12 +59,18 @@ function NLPModels.cons_nln!(mpcc::AbstractMPCCModel, x::AbstractVector, cx::Abs
     return cx
 end
 
+"""
+  Evaluates the constraint jacobian ``\\nabla c(x)`` excluding any constraints which appear in ``G(x)`` or ``H(x)``.
+"""
 function NLPModels.jac(mpcc::AbstractMPCCModel, x::AbstractVector)
   I,J = jac_structure(mpcc)
   V = jac_coord(mpcc, x)
   return sparse(I,J,V, get_ncon(mpcc), get_nvar(mpcc))
 end
 
+"""
+  Evaluates the COO structure of jacobian ``\\nabla c(x)`` excluding any constraints which appear in ``G(x)`` or ``H(x)``, in place.
+"""
 function NLPModels.jac_structure!(
     mpcc::AbstractMPCCModel,
     rows::AbstractVector{<:Integer},
@@ -58,6 +84,9 @@ function NLPModels.jac_structure!(
     return rows, cols
 end
 
+"""
+  Evaluates the COO structure of jacobian ``\\nabla c(x)`` excluding any constraints which appear in ``G(x)`` or ``H(x)``, to newly allocated vectors.
+"""
 function NLPModels.jac_structure(mpcc::AbstractMPCCModel)
     rows = Vector{Int}(undef, get_nnzj(mpcc))
     cols = Vector{Int}(undef, get_nnzj(mpcc))
@@ -100,12 +129,18 @@ function NLPModels.jac_nln_structure!(
     return rows, cols
 end
 
+"""
+  Evaluates the COO values of jacobian ``\\nabla c(x)`` excluding any constraints which appear in ``G(x)`` or ``H(x)``, in place.
+"""
 function NLPModels.jac_coord!(mpcc::AbstractMPCCModel, x::AbstractVector, j::AbstractVector)
     jac_coord!(mpcc.nlp, x, mpcc._j1)
     @views j .= mpcc._j1[get_ind_j_triplets(mpcc)]
     return j
 end
 
+"""
+  Evaluates the COO values of jacobian ``\\nabla c(x)`` excluding any constraints which appear in ``G(x)`` or ``H(x)``, to a newly allocated vector.
+"""
 function NLPModels.jac_coord(mpcc::AbstractMPCCModel{T}, x::AbstractVector) where {T}
     vals = Vector{T}(undef, get_nnzj(mpcc))
     return jac_coord!(mpcc, x, vals)
@@ -198,6 +233,11 @@ function NLPModels.jtprod_nln!(
     return Jtv
 end
 
+"""
+  Evaluates the Hessian of the Lagrangian, without the complementarity contribution.
+
+  Assumes zero multipliers.
+"""
 function NLPModels.hess(
   mpcc::AbstractMPCCModel{T, VT},
   x::AbstractVector,
@@ -209,6 +249,10 @@ function NLPModels.hess(
   return Symmetric(sparse(rows, cols, vals, get_nvar(mpcc), get_nvar(mpcc)), :L)
 end
 
+"""
+  Evaluates the Hessian of the Lagrangian, without the complementarity contribution.
+"""
+
 function NLPModels.hess(
     mpcc::AbstractMPCCModel{T},
     x::AbstractVector;
@@ -219,12 +263,18 @@ function NLPModels.hess(
     return Symmetric(sparse(rows, cols, vals, get_nvar(mpcc), get_nvar(mpcc)), :L)
 end
 
+"""
+  Evaluates the COO structure of the Hessian of the Lagrangian, without the complementarity contribution, to newly allocated vectors.
+"""
 function NLPModels.hess_structure(mpcc::AbstractMPCCModel)
   rows = Vector{Int}(undef, get_nnzh(mpcc))
   cols = Vector{Int}(undef, get_nnzh(mpcc))
   hess_structure!(mpcc, rows, cols)
 end
 
+"""
+  Evaluates the COO structure of the Hessian of the Lagrangian, without the complementarity contribution, in place.
+"""
 function NLPModels.hess_structure!(
     mpcc::AbstractMPCCModel,
     rows::AbstractVector{<:Integer},
@@ -235,6 +285,11 @@ function NLPModels.hess_structure!(
     return hess_structure!(mpcc.nlp, rows, cols)
 end
 
+"""
+  Evaluates the COO values of the Hessian of the Lagrangian, without the complementarity contribution, to newly allocated vectors.
+
+  Assumes zero multipliers.
+"""
 function NLPModels.hess_coord(
   mpcc::AbstractMPCCModel{T, VT},
   x::AbstractVector;
@@ -244,6 +299,9 @@ function NLPModels.hess_coord(
   return hess_coord!(mpcc, x, vals; obj_weight = obj_weight)
 end
 
+"""
+  Evaluates the COO values of the Hessian of the Lagrangian, without the complementarity contribution, to newly allocated vectors.
+"""
 function NLPModels.hess_coord(
   mpcc::AbstractMPCCModel{T, VT},
   x::AbstractVector,
@@ -254,6 +312,9 @@ function NLPModels.hess_coord(
   return hess_coord!(mpcc, x, y, vals; obj_weight = obj_weight)
 end
 
+"""
+  Evaluates the COO structure of the Hessian of the Lagrangian, without the complementarity contribution, in place.
+"""
 function NLPModels.hess_coord!(
     mpcc::AbstractMPCCModel{T, VT},
     x::AbstractVector{T},
@@ -266,6 +327,11 @@ function NLPModels.hess_coord!(
     return hess_coord!(mpcc.nlp, x, mpcc._c1, H; obj_weight=obj_weight)
 end
 
+"""
+  Evaluates the COO structure of the Hessian of the Lagrangian, without the complementarity contribution, in place.
+
+  Assumes zero multipliers.
+"""
 function NLPModels.hess_coord!(
     mpcc::AbstractMPCCModel{T, VT},
     x::AbstractVector{T},
@@ -288,11 +354,17 @@ function NLPModels.hprod!(
     return hprod!(mpcc.nlp, x, mpcc._c1, v, Hv; obj_weight=obj_weight)
 end
 
+"""
+  Evaluates G(x).
+"""
 function comp_left(mpcc::AbstractMPCCModel{T, VT}, x::AbstractVector{T}) where {T, VT}
     ccx = VT(undef, get_ncc(mpcc))
     return comp_left!(mpcc, x, ccx)
 end
 
+"""
+  Evaluates G(x) in place.
+"""
 function comp_left!(
     mpcc::AbstractMPCCModel{T, VT},
     x::AbstractVector{T},
@@ -320,11 +392,17 @@ function comp_left!(
     return ccx
 end
 
+"""
+  Evaluates H(x)
+"""
 function comp_right(mpcc::AbstractMPCCModel{T, VT}, x::AbstractVector{T}) where {T, VT}
     ccx = VT(undef, get_ncc(mpcc))
     return comp_right!(mpcc, x, ccx)
 end
 
+"""
+  Evaluates H(x) in place.
+"""
 function comp_right!(
     mpcc::AbstractMPCCModel{T, VT},
     x::AbstractVector{T},
@@ -352,11 +430,17 @@ function comp_right!(
     return ccx
 end
 
+"""
+  Evaluates ``\\ell_G``.
+"""
 function lcomp_left(mpcc::AbstractMPCCModel{T, VT}) where {T, VT}
     lccx = VT(undef, get_ncc(mpcc))
     return lcomp_left!(mpcc, lccx)
 end
 
+"""
+  Evaluates ``\\ell_G`` in place.
+"""
 function lcomp_left!(mpcc::AbstractMPCCModel{T, VT}, lccx::AbstractVector{T}) where {T, VT}
     @lencheck get_ncc(mpcc) lccx
 
@@ -370,11 +454,17 @@ function lcomp_left!(mpcc::AbstractMPCCModel{T, VT}, lccx::AbstractVector{T}) wh
     return lccx
 end
 
+"""
+  Evaluates ``\\ell_H``.
+"""
 function lcomp_right(mpcc::AbstractMPCCModel{T, VT}) where {T, VT}
     lccx = VT(undef, get_ncc(mpcc))
     return lcomp_right!(mpcc, lccx)
 end
 
+"""
+  Evaluates ``\\ell_H`` in place.
+"""
 function lcomp_right!(mpcc::AbstractMPCCModel{T, VT}, lccx::AbstractVector{T}) where {T, VT}
     @lencheck get_ncc(mpcc) lccx
 
@@ -388,11 +478,17 @@ function lcomp_right!(mpcc::AbstractMPCCModel{T, VT}, lccx::AbstractVector{T}) w
     return lccx
 end
 
+"""
+  Evaluates ``G(x) - \\ell_G``.
+"""
 function comp_res_left(mpcc::AbstractMPCCModel{T, VT}, x::AbstractVector{T}) where {T, VT}
     lccx = VT(undef, get_ncc(mpcc))
     return comp_res_left!(mpcc, x, lccx)
 end
 
+"""
+  Evaluates ``G(x) - \\ell_G``, in place.
+"""
 function comp_res_left!(
     mpcc::AbstractMPCCModel{T, VT},
     x::AbstractVector{T},
@@ -413,11 +509,17 @@ function comp_res_left!(
     return lccx
 end
 
+"""
+  Evaluates ``H(x) - \\ell_H``.
+"""
 function comp_res_right(mpcc::AbstractMPCCModel{T, VT}, x::AbstractVector{T}) where {T, VT}
     rccx = similar(mpcc._cc1, get_ncc(mpcc))
     return comp_res_right!(mpcc, x, rccx)
 end
 
+"""
+  Evaluates ``H(x) - \\ell_H``, in place.
+"""
 function comp_res_right!(
     mpcc::AbstractMPCCModel{T, VT},
     x::AbstractVector{T},
@@ -438,6 +540,9 @@ function comp_res_right!(
     return rccx
 end
 
+"""
+  Evaluates ``(G(x)-\\ell_G)\\odot(H(x)-\\ell_H)`` in place.
+"""
 function comp_res_prod!(
     mpcc::AbstractMPCCModel{T, VT},
     x::AbstractVector{T},
@@ -449,18 +554,27 @@ function comp_res_prod!(
     return ccx
 end
 
+"""
+  Evaluates ``\\nabla G(x)``.
+"""
 function jac_comp_left(mpcc::AbstractMPCCModel{T}, x::AbstractVector{T}) where {T}
     I,J = jac_comp_left_structure(mpcc)
     V = jac_comp_left_coord(mpcc, x)
     return sparse(I,J,V, get_ncc(mpcc), get_nvar(mpcc))
 end
 
+"""
+  Evaluates ``\\nabla H(x)``.
+"""
 function jac_comp_right(mpcc::AbstractMPCCModel{T}, x::AbstractVector{T}) where {T}
     I,J = jac_comp_right_structure(mpcc)
     V = jac_comp_right_coord(mpcc, x)
     return sparse(I,J,V, get_ncc(mpcc), get_nvar(mpcc))
 end
 
+"""
+  Evaluates COO structure of ``\\nabla G(x)``.
+"""
 function jac_comp_left_structure(mpcc::AbstractMPCCModel)
     rows = IndexSet(undef, get_comp_left_nnzj(mpcc))
     cols = IndexSet(undef, get_comp_left_nnzj(mpcc))
@@ -468,6 +582,9 @@ function jac_comp_left_structure(mpcc::AbstractMPCCModel)
     return jac_comp_left_structure!(mpcc, rows, cols)
 end
 
+"""
+  Evaluates COO structure of ``\\nabla G(x)``, in place.
+"""
 function jac_comp_left_structure!(
     mpcc::AbstractMPCCModel,
     rows::AbstractVector{<:Integer},
@@ -501,6 +618,9 @@ function jac_comp_left_structure!(
     return rows, cols
 end
 
+"""
+  Evaluates COO structure of ``\\nabla H(x)``.
+"""
 function jac_comp_right_structure(mpcc::AbstractMPCCModel)
     rows = IndexSet(undef, get_comp_right_nnzj(mpcc))
     cols = IndexSet(undef, get_comp_right_nnzj(mpcc))
@@ -508,6 +628,9 @@ function jac_comp_right_structure(mpcc::AbstractMPCCModel)
     return jac_comp_right_structure!(mpcc, rows, cols)
 end
 
+"""
+  Evaluates COO structure of ``\\nabla H(x)``, in place.
+"""
 function jac_comp_right_structure!(
     mpcc::AbstractMPCCModel,
     rows::AbstractVector{<:Integer},
@@ -542,6 +665,9 @@ function jac_comp_right_structure!(
     return rows, cols
 end
 
+"""
+  Evaluates COO values of ``\\nabla G(x)``.
+"""
 function jac_comp_left_coord(
     mpcc::AbstractMPCCModel{T, VT},
     x::AbstractVector,
@@ -551,6 +677,9 @@ function jac_comp_left_coord(
     return jac_comp_left_coord!(mpcc, x, vals)
 end
 
+"""
+  Evaluates COO values of ``\\nabla G(x)``, in place.
+"""
 function jac_comp_left_coord!(
     mpcc::AbstractMPCCModel,
     x::AbstractVector,
@@ -573,6 +702,9 @@ function jac_comp_left_coord!(
     return vals
 end
 
+"""
+  Evaluates COO values of ``\\nabla H(x)``.
+"""
 function jac_comp_right_coord(
     mpcc::AbstractMPCCModel{T, VT},
     x::AbstractVector,
@@ -582,6 +714,9 @@ function jac_comp_right_coord(
     return jac_comp_right_coord!(mpcc, x, vals)
 end
 
+"""
+  Evaluates COO values of ``\\nabla G(x)``, in place.
+"""
 function jac_comp_right_coord!(
     mpcc::AbstractMPCCModel,
     x::AbstractVector,
@@ -604,6 +739,9 @@ function jac_comp_right_coord!(
     return vals
 end
 
+"""
+  Evaluates ``\\vert\\min(G(x)-\\ell_G,H(x)-\\ell_H)\\vert_\\infty``.
+"""
 function comp_residual(mpcc::AbstractMPCCModel{T, VT}, x::AbstractVector) where {T, VT}
     # TODO(@anton): This can be done more efficiently in vertical form
     G = mpcc._cc1
@@ -615,6 +753,9 @@ function comp_residual(mpcc::AbstractMPCCModel{T, VT}, x::AbstractVector) where 
     return maximum(G)
 end
 
+"""
+  Evaluates ``\\vert (G(x)-\\ell_G)\\odot(H(x)-\\ell_H)\\vert_\\infty``.
+"""
 function comp_residual_product(
     mpcc::AbstractMPCCModel{T, VT},
     x::AbstractVector,
@@ -629,6 +770,9 @@ function comp_residual_product(
     return maximum(G)
 end
 
+"""
+  Evaluates ``(G(x)-\\ell_G)\\cdot(H(x)-\\ell_H)``.
+"""
 function comp_residual_sum(mpcc::AbstractMPCCModel{T, VT}, x::AbstractVector) where {T, VT}
     # TODO(@anton): This can be done more efficiently in vertical form
     G = mpcc._cc1
