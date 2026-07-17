@@ -1,7 +1,8 @@
 # [MPCCModels.jl documentation](@id Home)
 
-This package provides general guidelines to represent Mathematical Programs with Complementarity Constraints (MPCC) problems in Julia and a standardized API to evaluate the functions and their derivatives. 
+This package provides facilities to represent Mathematical Programs with Complementarity Constraints (MPCC) problems in Julia and a standardized API to evaluate the functions and their derivatives.
 The main objective is to be able to rely on that [API](@ref) when designing specialized MPCC solvers in Julia.
+It is built on the excellent tool for representing general Nonlinear Programs (NLPs) [`NLPModels.jl`](https://github.com/JuliaSmoothOptimizers/NLPModels.jl).
 
 ## Introduction
 
