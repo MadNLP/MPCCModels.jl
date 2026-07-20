@@ -1,7 +1,8 @@
 # [MPCCModels.jl documentation](@id Home)
 
-This package provides general guidelines to represent Mathematical Programs with Complementarity Constraints (MPCC) problems in Julia and a standardized API to evaluate the functions and their derivatives. 
+This package provides facilities to represent Mathematical Programs with Complementarity Constraints (MPCC) problems in Julia and a standardized API to evaluate the functions and their derivatives.
 The main objective is to be able to rely on that [API](@ref) when designing specialized MPCC solvers in Julia.
+It is built on the excellent tool for representing general Nonlinear Programs (NLPs) [`NLPModels.jl`](https://github.com/JuliaSmoothOptimizers/NLPModels.jl).
 
 ## Introduction
 
@@ -27,6 +28,23 @@ Such instances are composed of
   including the number of variables, constraints, bounds on the variables, etc.
   This `MPCCModelMeta` wraps an `AbstractNLPModelMeta` and only updates the necessary fields by overloading the getter api in `NLPModels.jl`.
 - the underlying `AbstractNLPModel` which stores the data necessary to build the MPCC.
+
+## Important Usage Note
+Note that while we support modelling MPCCs with nonlinear functions ``G(x)`` and ``H(x)``, the [API](@ref) supports only vertical
+form mpccs: 
+```math
+\begin{aligned}
+\min \quad & f(x) \\
+& \ell^c \le c(x) \le u^c,\\
+& \ell^G\le x_1 \perp x_2\ge \ell^H, \\
+& \ell_0 \leq x_0 \leq u_0,
+& x_1 \leq u_1,
+& x_2 \leq u_2,
+\end{aligned}
+```
+where ``x_0`` ``x_1`` and ``x_2`` correspond to subsets of the decision variables ``x``.
+In order to ensure your MPCC is in vertical form use the [`vertical_form`](@ref) function.
+
 
 ## Install
 
